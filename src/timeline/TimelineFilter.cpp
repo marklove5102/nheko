@@ -176,8 +176,7 @@ TimelineFilter::sourceDataChanged(const QModelIndex &topLeft,
 {
     if (!roles.contains(TimelineModel::Roles::Body) && !roles.contains(TimelineModel::ThreadId) &&
         !roles.contains(TimelineModel::Notificationlevel) &&
-        !roles.contains(TimelineModel::UserId) &&
-        !roles.contains(TimelineModel::UserName))
+        !roles.contains(TimelineModel::UserId) && !roles.contains(TimelineModel::UserName))
         return;
 
     if (auto s = source()) {
@@ -282,15 +281,23 @@ TimelineFilter::filterAcceptsRow(int source_row, const QModelIndex &) const
 
         if (!contentFilter.isEmpty()) {
             // Check if filter matches sender's user ID, display name or message body.
-            if (!s->data(idx, TimelineModel::UserId)
-                    .toString()
-                    .contains(contentFilter, Qt::CaseInsensitive) &&
-                !s->data(idx, TimelineModel::UserName)
-                    .toString()
-                    .contains(contentFilter, Qt::CaseInsensitive) &&
-                !s->data(idx, TimelineModel::Body)
-                    .toString()
-                    .contains(contentFilter, Qt::CaseInsensitive)) {
+            std::array<QModelRoleData, 3> roles = {{
+              QModelRoleData(TimelineModel::UserId),
+              QModelRoleData(TimelineModel::UserName),
+              QModelRoleData(TimelineModel::Body),
+            }};
+            QModelRoleDataSpan roleSpan(roles);
+
+            s->multiData(idx, roleSpan);
+            if (!roleSpan.dataForRole(TimelineModel::UserId)
+                   ->toString()
+                   .contains(contentFilter, Qt::CaseInsensitive) &&
+                !roleSpan.dataForRole(TimelineModel::UserName)
+                   ->toString()
+                   .contains(contentFilter, Qt::CaseInsensitive) &&
+                !roleSpan.dataForRole(TimelineModel::Body)
+                   ->toString()
+                   .contains(contentFilter, Qt::CaseInsensitive)) {
                 return false;
             }
         }
