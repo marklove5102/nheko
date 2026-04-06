@@ -48,7 +48,7 @@
     <message>
         <location line="+84"/>
         <source>Failed to update aliases: %1</source>
-        <translation>Aggiornamento degli alias fallito: %1</translation>
+        <translation>Impossibile aggiornare gli alias: %1</translation>
     </message>
 </context>
 <context>
